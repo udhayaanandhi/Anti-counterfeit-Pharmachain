@@ -1,0 +1,258 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+// ═══════════════════════════════════════════════════════════
+//  PharmaChain — Anti-Counterfeit Pharmaceutical Network
+//  Role numbers : 1=Manufacturer 2=Distributor 3=Pharmacist
+//                 4=Consumer     5=Regulator
+//  Status codes : 0=Manufactured 1=InTransit  3=AtPharmacy
+//                 4=Dispensed    5=Recalled
+// ═══════════════════════════════════════════════════════════
+contract PharmaChain {
+
+    address public owner;
+    uint256 public drugCount;
+    uint256 public actorCount;
+
+    // ── STRUCTS ─────────────────────────────────────────────
+    struct Actor {
+        string  name;
+        uint8   role;
+        bool    isActive;
+        uint256 registeredAt;
+        string  license;
+    }
+
+    struct Drug {
+        string  batchId;
+        string  name;
+        string  mfrName;
+        uint256 madeAt;
+        uint256 expiresAt;
+        string  composition;
+        uint8   status;
+        address holder;
+        bool    recalled;
+        string  recallReason;
+        uint256 price;
+    }
+
+    struct Log {
+        address from;
+        address to;
+        uint8   status;
+        uint256 ts;
+        string  note;
+    }
+
+    // ── STORAGE ─────────────────────────────────────────────
+    mapping(address => Actor)   public actors;
+    mapping(string  => Drug)    public drugs;
+    mapping(string  => Log[])   public logs;
+    mapping(address => string[]) public inventory;
+    mapping(uint8   => address[]) public byRole;
+    string[] public allBatches;
+
+    // ── EVENTS ──────────────────────────────────────────────
+    event ActorAdded(address indexed who, uint8 role, string name);
+    event BatchCreated(string indexed id, string name, address by);
+    event BatchMoved(string indexed id, address from, address to, uint8 status);
+    event BatchRecalled(string indexed id, string reason, address by);
+    event BatchDispensed(string indexed id, address pharmacist, address consumer);
+
+    // ── CUSTOM ERRORS (cheaper than revert strings) ─────────
+    error OnlyOwnerOrRegulator();
+    error NotYourRole();
+    error Inactive();
+    error NotFound();
+    error Exists();
+    error WrongRole();
+    error NotHolder();
+    error IsRecalled();
+    error IsExpired();
+    error AlreadyRecalled();
+    error BadInput();
+
+    // ── CONSTRUCTOR ─────────────────────────────────────────
+    constructor() {
+        owner = msg.sender;
+        actors[msg.sender] = Actor("System Regulator", 5, true, block.timestamp, "REG-000");
+        byRole[5].push(msg.sender);
+        actorCount = 1;
+    }
+
+    // ── GUARDS ──────────────────────────────────────────────
+    function _reg() internal view {
+        if (msg.sender != owner && actors[msg.sender].role != 5)
+            revert OnlyOwnerOrRegulator();
+    }
+    function _role(uint8 r) internal view {
+        if (actors[msg.sender].role != r) revert NotYourRole();
+        if (!actors[msg.sender].isActive)  revert Inactive();
+    }
+    function _exists(string calldata id) internal view {
+        if (bytes(drugs[id].batchId).length == 0) revert NotFound();
+    }
+    function _ok(string calldata id) internal view {
+        if (drugs[id].recalled) revert IsRecalled();
+    }
+
+    // ── ACTOR MANAGEMENT ────────────────────────────────────
+    function addActor(address a, string calldata name, uint8 role, string calldata lic) external {
+        _reg();
+        if (role == 0 || role > 5)       revert BadInput();
+        if (actors[a].role != 0)          revert Exists();
+        if (bytes(lic).length == 0)       revert BadInput();
+        actors[a] = Actor(name, role, true, block.timestamp, lic);
+        byRole[role].push(a);
+        actorCount++;
+        emit ActorAdded(a, role, name);
+    }
+
+    function removeActor(address a) external {
+        _reg();
+        if (actors[a].role == 0) revert NotFound();
+        actors[a].isActive = false;
+    }
+
+    function getActor(address a) external view returns (
+        string memory name, uint8 role, bool active, uint256 since, string memory lic
+    ) {
+        Actor storage ac = actors[a];
+        return (ac.name, ac.role, ac.isActive, ac.registeredAt, ac.license);
+    }
+
+    function getByRole(uint8 r) external view returns (address[] memory) {
+        return byRole[r];
+    }
+
+    // ── MANUFACTURE ─────────────────────────────────────────
+    function manufacture(
+        string calldata id,
+        string calldata name,
+        uint256 expires,
+        string calldata comp,
+        uint256 price
+    ) external {
+        _role(1);
+        if (bytes(id).length == 0)               revert BadInput();
+        if (bytes(drugs[id].batchId).length != 0) revert Exists();
+        if (expires <= block.timestamp)           revert BadInput();
+
+        drugs[id] = Drug(id, name, actors[msg.sender].name,
+            block.timestamp, expires, comp, 0, msg.sender, false, "", price);
+        logs[id].push(Log(address(0), msg.sender, 0, block.timestamp, "Manufactured & registered"));
+        inventory[msg.sender].push(id);
+        allBatches.push(id);
+        drugCount++;
+        emit BatchCreated(id, name, msg.sender);
+    }
+
+    // ── TRANSFER: MFR → DIST ────────────────────────────────
+    function sendToDistributor(string calldata id, address dist, string calldata note) external {
+        _role(1); _exists(id); _ok(id);
+        if (drugs[id].holder != msg.sender) revert NotHolder();
+        if (actors[dist].role != 2)         revert WrongRole();
+        if (!actors[dist].isActive)         revert Inactive();
+        _transfer(id, dist, 1, note);
+    }
+
+    // ── TRANSFER: DIST → PHARMACY ────────────────────────────
+    function sendToPharmacy(string calldata id, address pharm, string calldata note) external {
+        _role(2); _exists(id); _ok(id);
+        if (drugs[id].holder != msg.sender) revert NotHolder();
+        if (actors[pharm].role != 3)        revert WrongRole();
+        if (!actors[pharm].isActive)        revert Inactive();
+        _transfer(id, pharm, 3, note);
+    }
+
+    // ── DISPENSE: PHARMACY → CONSUMER ───────────────────────
+    function dispense(string calldata id, address consumer, string calldata note) external {
+        _role(3); _exists(id); _ok(id);
+        if (drugs[id].holder != msg.sender)    revert NotHolder();
+        if (actors[consumer].role != 4)        revert WrongRole();
+        if (block.timestamp >= drugs[id].expiresAt) revert IsExpired();
+        _transfer(id, consumer, 4, note);
+        emit BatchDispensed(id, msg.sender, consumer);
+    }
+
+    // ── VERIFY (anyone can call) ─────────────────────────────
+    function verify(string calldata id) external view returns (
+        bool authentic, bool expired, bool recalled
+    ) {
+        if (bytes(drugs[id].batchId).length == 0) return (false, false, false);
+        Drug storage d = drugs[id];
+        recalled  = d.recalled;
+        expired   = block.timestamp >= d.expiresAt;
+        authentic = !recalled && !expired;
+    }
+
+    // ── RECALL ───────────────────────────────────────────────
+    function recall(string calldata id, string calldata reason) external {
+        _exists(id);
+        uint8 r = actors[msg.sender].role;
+        if (r != 5 && r != 1)     revert OnlyOwnerOrRegulator();
+        if (drugs[id].recalled)   revert AlreadyRecalled();
+        drugs[id].recalled     = true;
+        drugs[id].recallReason = reason;
+        drugs[id].status       = 5;
+        emit BatchRecalled(id, reason, msg.sender);
+    }
+
+    // ── READ ─────────────────────────────────────────────────
+    function getDrug(string calldata id) external view returns (
+        string memory name, string memory mfr,
+        uint256 madeAt, uint256 expiresAt,
+        string memory comp, uint8 status,
+        address holder, bool recalled,
+        string memory recallReason, uint256 price
+    ) {
+        Drug storage d = drugs[id];
+        if (bytes(d.batchId).length == 0) revert NotFound();
+        return (d.name, d.mfrName, d.madeAt, d.expiresAt,
+                d.composition, d.status, d.holder,
+                d.recalled, d.recallReason, d.price);
+    }
+
+    function getLogs(string calldata id) external view returns (Log[] memory) {
+        return logs[id];
+    }
+
+    function getInventory(address a) external view returns (string[] memory) {
+        return inventory[a];
+    }
+
+    function getAllBatches() external view returns (string[] memory) {
+        return allBatches;
+    }
+
+    function stats() external view returns (uint256 total, uint256 people, uint256 recalled) {
+        uint256 r;
+        for (uint256 i; i < allBatches.length; i++)
+            if (drugs[allBatches[i]].recalled) r++;
+        return (drugCount, actorCount, r);
+    }
+
+    // ── INTERNAL ─────────────────────────────────────────────
+    function _transfer(string calldata id, address to, uint8 st, string calldata note) internal {
+        address from = drugs[id].holder;
+        drugs[id].holder = to;
+        drugs[id].status = st;
+        logs[id].push(Log(from, to, st, block.timestamp, note));
+        _popInventory(from, id);
+        inventory[to].push(id);
+        emit BatchMoved(id, from, to, st);
+    }
+
+    function _popInventory(address who, string calldata id) internal {
+        string[] storage inv = inventory[who];
+        bytes32 h = keccak256(bytes(id));
+        for (uint256 i; i < inv.length; i++) {
+            if (keccak256(bytes(inv[i])) == h) {
+                inv[i] = inv[inv.length - 1];
+                inv.pop();
+                return;
+            }
+        }
+    }
+}
