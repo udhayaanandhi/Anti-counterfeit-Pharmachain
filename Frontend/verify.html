@@ -1,0 +1,191 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>PharmaChain — Verify Drug</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080612;--card:#110c1f;--bo:rgba(139,92,246,.15);--p4:#a78bfa;--p5:#7c3aed;--cy:#67e8f9;--gn:#34d399;--rd:#f87171;--am:#fbbf24;--tx:#ede9fe;--mu:rgba(237,233,254,.42);--fn:'Outfit',sans-serif;--mo:'JetBrains Mono',monospace;--hd:'Cinzel',serif}
+html,body{min-height:100%;background:var(--bg);color:var(--tx);font-family:var(--fn);display:flex;flex-direction:column;align-items:center;padding:30px 16px}
+.logo{display:flex;align-items:center;gap:8px;margin-bottom:28px}
+.li{width:36px;height:36px;background:linear-gradient(135deg,var(--p5),#f472b6);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.ln{font-family:var(--hd);font-size:1rem;color:#fff}
+.ls{font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mu)}
+.box{background:var(--card);border:1px solid var(--bo);border-radius:16px;padding:24px;max-width:480px;width:100%}
+.box h1{font-family:var(--hd);font-size:1.2rem;margin-bottom:6px}
+.box p{font-size:.8rem;color:var(--mu);margin-bottom:18px}
+.fg{margin-bottom:11px}
+.fg label{display:block;font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;color:#c4b5fd;font-weight:600;margin-bottom:3px}
+input{width:100%;padding:9px 11px;background:rgba(4,1,10,.65);border:1px solid var(--bo);border-radius:7px;color:var(--tx);font-family:var(--mo);font-size:.9rem;letter-spacing:.04em;outline:none;transition:.16s}
+input:focus{border-color:var(--p5);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+input::placeholder{color:rgba(167,139,250,.25);font-family:var(--fn);font-size:.82rem;letter-spacing:0}
+.brow{display:flex;gap:8px;margin-bottom:0}
+.btn{flex:1;padding:11px;border:none;border-radius:7px;cursor:pointer;font-family:var(--fn);font-size:.84rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;transition:.18s}
+.bp{background:linear-gradient(135deg,var(--p5),#5b21b6);color:#fff;box-shadow:0 2px 10px rgba(124,58,237,.28)}
+.bp:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.bp:disabled{opacity:.38;cursor:not-allowed;transform:none;filter:none}
+.bsc{background:rgba(103,232,249,.1);color:var(--cy);border:1px solid rgba(103,232,249,.22)}
+.bsc:hover{background:rgba(103,232,249,.18)}
+.vr{padding:18px;border-radius:12px;text-align:center;margin-top:14px;animation:fu .28s ease}
+.vrok{background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.24)}
+.vrbd{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.24)}
+.vrwn{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.24)}
+.vr-i{font-size:2.8rem;margin-bottom:6px}
+.vr h2{font-family:var(--hd);font-size:1.1rem}
+.vrd{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px;text-align:left}
+.vrf{background:rgba(0,0,0,.22);border-radius:7px;padding:9px 11px}
+.vrf .lb{font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:2px}
+.vrf .vl{font-size:.79rem;color:var(--tx)}
+@keyframes fu{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.tlw{padding-left:20px;position:relative;margin-top:12px}
+.tlw::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--p5),transparent)}
+.tli{position:relative;margin-bottom:12px;padding:10px 12px;background:var(--card);border:1px solid var(--bo);border-radius:11px}
+.tli::before{content:'';position:absolute;left:-15px;top:13px;width:8px;height:8px;background:var(--p5);border-radius:50%;border:2px solid var(--bg);box-shadow:0 0 5px var(--p5)}
+.bd{display:inline-flex;align-items:center;padding:2px 8px;border-radius:100px;font-size:.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.b0{background:rgba(124,58,237,.18);color:#c4b5fd;border:1px solid rgba(124,58,237,.35)}
+.b1{background:rgba(251,191,36,.14);color:var(--am);border:1px solid rgba(251,191,36,.3)}
+.b2{background:rgba(52,211,153,.14);color:var(--gn);border:1px solid rgba(52,211,153,.3)}
+.b3{background:rgba(103,232,249,.12);color:var(--cy);border:1px solid rgba(103,232,249,.26)}
+.b4{background:rgba(248,113,113,.14);color:var(--rd);border:1px solid rgba(248,113,113,.3)}
+.mo{font-family:var(--mo);font-size:.7rem;color:var(--cy)}
+#loader{position:fixed;inset:0;background:rgba(8,6,18,.78);display:none;align-items:center;justify-content:center;z-index:99}
+.spin{width:28px;height:28px;border:3px solid rgba(124,58,237,.28);border-top-color:var(--p5);border-radius:50%;animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#scan-modal{position:fixed;inset:0;background:rgba(8,6,18,.92);display:none;align-items:center;justify-content:center;z-index:90;backdrop-filter:blur(6px)}
+.scan-box{background:var(--card);border:1px solid rgba(139,92,246,.3);border-radius:16px;padding:22px;max-width:400px;width:90%;text-align:center;position:relative}
+.scan-box h2{font-family:var(--hd);font-size:1rem;margin-bottom:5px;color:#c4b5fd}
+#sv{width:100%;border-radius:9px;margin-top:8px;background:#000}
+.sclose{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--mu);font-size:1.2rem;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="loader"><div class="spin"></div></div>
+<div id="scan-modal"><div class="scan-box">
+  <button class="sclose" onclick="closeScan()">✕</button>
+  <h2>📷 Scan Drug QR Code</h2>
+  <p style="font-size:.74rem;color:var(--mu)">Point camera at the QR code on the packaging</p>
+  <video id="sv" autoplay muted playsinline></video>
+</div></div>
+
+<div class="logo"><div class="li">⬡</div><div><div class="ln">PharmaChain</div><div class="ls">Anti-Counterfeit Verify</div></div></div>
+
+<div class="box">
+  <h1>🔍 Verify Drug Authenticity</h1>
+  <p>Enter the Batch ID printed on the medicine packaging, or scan the QR code.</p>
+  <div class="fg"><label>Batch ID</label><input id="bid" placeholder="e.g. BATCH-2025-001" oninput="clearRes()" onkeydown="if(event.key==='Enter')doVerify()"/></div>
+  <div class="brow">
+    <button class="btn bp" id="vbtn" onclick="doVerify()">🔍 Verify Now</button>
+    <button class="btn bsc" onclick="openScan()">📷 Scan QR</button>
+  </div>
+  <div id="vres"></div>
+</div>
+
+<p style="margin-top:16px;font-size:.68rem;color:rgba(196,181,253,.22)">Powered by Ethereum · Sepolia Testnet</p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.10.0/web3.min.js"></script>
+<script src="config.js"></script>
+<script>
+var ST=['Manufactured','In Transit','At Pharmacy','Dispensed','Recalled'];
+function fmtTs(ts){if(!ts||ts==0)return'—';var n=parseInt(ts);return isNaN(n)||n===0?'—':new Date(n*1000).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function sbadge(s){var c=['b0','b1','b2','b3','b4'];return'<span class="bd '+(c[s]||'b0')+'">'+( ST[s]||'?')+'</span>';}
+function loading(v){document.getElementById('loader').style.display=v?'flex':'none';}
+function clearRes(){document.getElementById('vres').innerHTML='';}
+
+// Pre-fill from URL param (QR scan redirect)
+window.addEventListener('DOMContentLoaded',function(){
+  var p=new URLSearchParams(location.search);
+  var id=p.get('id');
+  if(id){document.getElementById('bid').value=id;doVerify();}
+});
+
+async function doVerify(){
+  var id=document.getElementById('bid').value.trim();
+  if(!id){document.getElementById('vres').innerHTML='<div style="text-align:center;color:var(--am);margin-top:12px;font-size:.82rem">⚠️ Enter a Batch ID</div>';return;}
+  if(CONTRACT_ADDRESS==='0x0000000000000000000000000000000000000000'){
+    document.getElementById('vres').innerHTML='<div style="text-align:center;color:var(--am);margin-top:12px;font-size:.82rem">⚠️ config.js — CONTRACT_ADDRESS not set</div>';return;}
+  var res=document.getElementById('vres');
+  var btn=document.getElementById('vbtn');btn.disabled=true;
+  loading(true);
+  try{
+    var w3=new Web3('https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161');
+    var c=new w3.eth.Contract(CONTRACT_ABI,CONTRACT_ADDRESS);
+    var v=await c.methods.verify(id).call();
+    if(!v.found){
+      res.innerHTML='<div class="vr vrbd"><div class="vr-i">⚠️</div><h2 style="color:var(--am)">NOT REGISTERED</h2>'
+        +'<p style="color:var(--mu);margin-top:8px;font-size:.8rem"><b style="color:var(--rd)">This batch ID is not on the blockchain.</b><br>This medicine may be COUNTERFEIT.<br>Do not use it. Report to your pharmacist immediately.</p></div>';
+      return;
+    }
+    var d=await c.methods.getDrug(id).call();
+    if(v.authentic){
+      res.innerHTML='<div class="vr vrok"><div class="vr-i">✅</div><h2 style="color:var(--gn)">AUTHENTIC</h2>'
+        +'<p style="color:var(--mu);font-size:.77rem;margin-top:3px">Verified on Ethereum blockchain</p>'
+        +'<div class="vrd">'
+        +'<div class="vrf"><div class="lb">Medicine</div><div class="vl">'+d.name+'</div></div>'
+        +'<div class="vrf"><div class="lb">Manufacturer</div><div class="vl">'+d.mfrName+'</div></div>'
+        +'<div class="vrf"><div class="lb">Batch ID</div><div class="vl"><span class="mo">'+id+'</span></div></div>'
+        +'<div class="vrf"><div class="lb">Expiry</div><div class="vl">'+fmtTs(d.expiresAt)+'</div></div>'
+        +'<div class="vrf"><div class="lb">Status</div><div class="vl">'+sbadge(parseInt(d.status))+'</div></div>'
+        +'<div class="vrf"><div class="lb">Composition</div><div class="vl" style="font-size:.72rem">'+d.comp+'</div></div>'
+        +'</div>'
+        +'<button onclick="loadHistory(\''+id+'\')" style="margin-top:10px;background:transparent;border:1px solid var(--bo);color:var(--p4);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.74rem">🔗 View Full Chain of Custody</button>'
+        +'</div>';
+    } else if(v.recalled){
+      res.innerHTML='<div class="vr vrbd"><div class="vr-i">🚨</div><h2 style="color:var(--rd)">RECALLED — DO NOT USE</h2>'
+        +'<p style="font-size:.79rem;color:var(--mu);margin-top:4px">'+d.name+'</p>'
+        +'<div style="margin-top:10px;padding:9px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.22);border-radius:7px;color:var(--rd);font-size:.76rem;text-align:left">Recall reason: '+d.recallReason+'<br><br>Return this medicine to your pharmacist immediately.</div></div>';
+    } else {
+      res.innerHTML='<div class="vr vrwn"><div class="vr-i">⏰</div><h2 style="color:var(--am)">EXPIRED</h2>'
+        +'<p style="color:var(--mu);font-size:.79rem;margin-top:4px">'+d.name+' — expired '+fmtTs(d.expiresAt)+'</p></div>';
+    }
+  }catch(e){
+    res.innerHTML='<div style="text-align:center;color:var(--rd);margin-top:12px;font-size:.8rem">Error: '+e.message+'</div>';
+  }finally{loading(false);btn.disabled=false;}
+}
+
+async function loadHistory(id){
+  var res=document.getElementById('vres');
+  loading(true);
+  try{
+    var w3=new Web3('https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161');
+    var c=new w3.eth.Contract(CONTRACT_ABI,CONTRACT_ADDRESS);
+    var logs=await c.methods.getLogs(id).call();
+    if(!logs.length){return;}
+    var h='<div style="margin-top:12px"><div style="font-family:var(--hd);font-size:.82rem;color:var(--p4);margin-bottom:8px">🔗 Chain of Custody</div><div class="tlw">'
+      +logs.map(function(l){
+        var icons=['🏭','🚚','💊','👤','🚨'];var s=parseInt(l.status);
+        var fn=function(a){if(!a||a.length<12)return a||'—';return a.slice(0,6)+'…'+a.slice(-4);};
+        return'<div class="tli"><div style="display:flex;justify-content:space-between;margin-bottom:5px">'
+          +'<div style="display:flex;align-items:center;gap:5px"><span>'+(icons[s]||'📦')+'</span>'+sbadge(s)+'</div>'
+          +'<span style="font-size:.68rem;color:var(--mu)">'+fmtTs(l.ts)+'</span></div>'
+          +'<p style="font-size:.74rem"><span class="mo">'+fn(l.from)+'</span> → <span class="mo">'+fn(l.to)+'</span></p>'
+          +'<p style="font-size:.72rem;color:var(--mu);margin-top:3px">'+l.note+'</p></div>';
+      }).join('')+'</div></div>';
+    res.innerHTML+=h;
+  }catch(e){}finally{loading(false);}
+}
+
+// QR scanner
+var ss=null;
+function openScan(){
+  if(!navigator.mediaDevices){alert('Camera not available');return;}
+  document.getElementById('scan-modal').style.display='flex';
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(stream){
+    ss=stream;var v=document.getElementById('sv');v.srcObject=stream;v.play();scanLoop(v);
+  }).catch(function(e){alert('Camera: '+e.message);closeScan();});
+}
+function closeScan(){if(ss)ss.getTracks().forEach(function(t){t.stop();});document.getElementById('scan-modal').style.display='none';}
+function scanLoop(v){
+  if(document.getElementById('scan-modal').style.display==='none')return;
+  if(v.readyState>=2&&'BarcodeDetector' in window){
+    var bd=new BarcodeDetector({formats:['qr_code']});
+    bd.detect(v).then(function(codes){
+      if(codes.length){
+        var raw=codes[0].rawValue;
+        var m=raw.match(/[?&]id=([^&]+)/);
+        document.getElementById('bid').value=m?decodeURIComponent(m[1]):raw;
+        closeScan();doVerify();
+      }
+    }).catch(function(){});
+  }
+  requestAnimationFrame(function(){scanLoop(v);});
+}
+</script>
+</body></html>

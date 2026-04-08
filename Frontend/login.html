@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>PharmaChain — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0818;--card:#160d2a;--border:rgba(167,139,250,.18);
+  --p4:#a78bfa;--p5:#7c3aed;--p6:#5b21b6;
+  --rose:#f472b6;--cyan:#67e8f9;--green:#34d399;--red:#f87171;--amber:#fbbf24;
+  --txt:#ede9fe;--muted:rgba(237,233,254,.5);
+  --r:14px;--r2:22px;
+  --font:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;--display:'Cinzel',serif;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);display:grid;grid-template-columns:1fr 460px}
+
+/* ─ LEFT PANEL ─ */
+.hero{
+  position:relative;overflow:hidden;
+  background:linear-gradient(160deg,rgba(13,8,24,.9) 0%,rgba(59,21,96,.65) 55%,rgba(13,8,24,.95) 100%),
+  url('https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=1200&q=80') center/cover no-repeat;
+  display:flex;flex-direction:column;justify-content:center;padding:64px 56px;
+}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;animation:pulse 6s ease-in-out infinite}
+.o1{width:500px;height:500px;top:-120px;left:-120px;background:rgba(124,58,237,.25);animation-delay:0s}
+.o2{width:350px;height:350px;bottom:60px;right:0;background:rgba(244,114,182,.18);animation-delay:3s}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+
+.dots{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.dot{position:absolute;width:2px;height:2px;border-radius:50%;background:rgba(196,181,253,.7);animation:rise linear infinite}
+@keyframes rise{from{transform:translateY(110vh);opacity:0}10%{opacity:1}90%{opacity:.8}to{transform:translateY(-10vh) translateX(20px);opacity:0}}
+
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:52px;position:relative;z-index:1}
+.logo-hex{width:48px;height:48px;background:linear-gradient(135deg,var(--p5),var(--rose));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:0 6px 20px rgba(124,58,237,.5)}
+.logo-name{font-family:var(--display);font-size:1.3rem;color:#fff}
+.logo-tag{font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+.hero-content{position:relative;z-index:1}
+.hero h1{font-family:var(--display);font-size:clamp(1.9rem,3vw,2.7rem);line-height:1.2;color:#fff;margin-bottom:18px}
+.hero h1 em{color:var(--p4);font-style:normal}
+.hero p{font-size:.97rem;color:rgba(237,233,254,.65);line-height:1.75;max-width:420px;margin-bottom:40px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:100px;background:rgba(124,58,237,.18);border:1px solid rgba(167,139,250,.22);font-size:.78rem;color:var(--p4)}
+.chip::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green)}
+
+/* ─ RIGHT PANEL ─ */
+.panel{background:var(--card);display:flex;flex-direction:column;justify-content:center;padding:44px 38px;overflow-y:auto;border-left:1px solid var(--border);position:relative}
+.panel::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 10%,rgba(124,58,237,.1) 0%,transparent 60%);pointer-events:none}
+
+.ph{margin-bottom:28px;position:relative;z-index:1}
+.ph h2{font-family:var(--display);font-size:1.65rem;color:var(--txt);margin-bottom:6px}
+.ph p{font-size:.875rem;color:var(--muted)}
+
+/* Alert */
+#alert{display:none;padding:12px 16px;border-radius:10px;font-size:.85rem;margin-bottom:18px;align-items:flex-start;gap:10px;position:relative;z-index:1;line-height:1.5}
+.a-info{background:rgba(103,232,249,.1);border:1px solid rgba(103,232,249,.3);color:var(--cyan)}
+.a-ok{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:var(--green)}
+.a-warn{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);color:var(--amber)}
+.a-err{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--red)}
+
+/* Role grid */
+.rlabel{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;margin-bottom:8px;position:relative;z-index:1}
+.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:5px;background:rgba(10,5,20,.5);border:1px solid var(--border);border-radius:12px;margin-bottom:20px;position:relative;z-index:1}
+.rt{padding:10px 4px;border-radius:8px;text-align:center;cursor:pointer;font-size:.74rem;font-weight:600;color:rgba(196,181,253,.45);border:1px solid transparent;transition:all .22s;user-select:none}
+.rt .ri{display:block;font-size:1rem;margin-bottom:2px}
+.rt:hover{color:var(--txt);background:rgba(124,58,237,.12)}
+.rt.on{background:rgba(124,58,237,.28);color:#fff;border-color:rgba(167,139,250,.35);box-shadow:0 2px 12px rgba(124,58,237,.3)}
+
+/* Wallet bar */
+.wbar{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(8,4,18,.5);border:1px solid var(--border);border-radius:10px;margin-bottom:18px;position:relative;z-index:1}
+.wled{width:9px;height:9px;border-radius:50%;background:var(--red);box-shadow:0 0 7px var(--red);flex-shrink:0;transition:all .4s}
+.wled.on{background:var(--green);box-shadow:0 0 7px var(--green)}
+.wlabel{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.waddr{font-family:var(--mono);font-size:.78rem;color:var(--cyan)}
+
+/* Buttons */
+.bmm{width:100%;padding:14px;border:none;border-radius:10px;cursor:pointer;font-family:var(--font);font-size:.92rem;font-weight:700;letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .25s;margin-bottom:12px;position:relative;z-index:1}
+.bmm-main{background:linear-gradient(135deg,#f6851b,#e2761b);color:#fff;box-shadow:0 4px 18px rgba(246,133,27,.35)}
+.bmm-main:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 6px 24px rgba(246,133,27,.45)}
+.bmm-main:disabled{opacity:.45;cursor:not-allowed;transform:none;filter:none}
+.bmm-demo{background:rgba(124,58,237,.2);color:var(--p4);border:1px solid rgba(167,139,250,.3)}
+.bmm-demo:hover{background:rgba(124,58,237,.32);border-color:var(--p4)}
+
+.div{display:flex;align-items:center;gap:10px;margin:14px 0;color:rgba(196,181,253,.25);font-size:.75rem;position:relative;z-index:1}
+.div::before,.div::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.note{padding:12px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);border-radius:10px;font-size:.8rem;color:rgba(196,181,253,.65);text-align:center;line-height:1.5;margin-top:20px;position:relative;z-index:1}
+
+.foot{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:18px;font-size:.72rem;color:rgba(196,181,253,.3);position:relative;z-index:1}
+.foot-dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
+
+@media(max-width:860px){body{grid-template-columns:1fr}.hero{display:none}.panel{padding:32px 22px}}
+</style>
+</head>
+<body>
+
+<!-- LEFT -->
+<div class="hero">
+  <div class="orb o1"></div><div class="orb o2"></div>
+  <div class="dots" id="dots"></div>
+  <div class="logo">
+    <div class="logo-hex">⬡</div>
+    <div><div class="logo-name">PharmaChain</div><div class="logo-tag">Anti-Counterfeit Network</div></div>
+  </div>
+  <div class="hero-content">
+    <h1>Medicine you can <em>trust</em> — verified on the blockchain</h1>
+    <p>Every drug batch is immutably registered from manufacturer to patient. Tamper-proof provenance, real-time recall alerts, and instant authenticity checks — all on Ethereum.</p>
+    <div class="chips">
+      <span class="chip">Immutable Records</span>
+      <span class="chip">Real-time Tracking</span>
+      <span class="chip">Instant Verification</span>
+      <span class="chip">Recall Alerts</span>
+      <span class="chip">Role-Based Access</span>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT -->
+<div class="panel">
+  <div class="ph"><h2>Welcome Back</h2><p>Connect MetaMask to access your dashboard</p></div>
+
+  <div id="alert"></div>
+
+  <div class="rlabel">Your Role</div>
+  <div class="roles">
+    <div class="rt on" data-r="5" onclick="pick(5,this)"><span class="ri">🛡️</span>Regulator</div>
+    <div class="rt" data-r="1" onclick="pick(1,this)"><span class="ri">🏭</span>Manufacturer</div>
+    <div class="rt" data-r="2" onclick="pick(2,this)"><span class="ri">🚚</span>Distributor</div>
+    <div class="rt" data-r="3" onclick="pick(3,this)"><span class="ri">💊</span>Pharmacist</div>
+    <div class="rt" data-r="4" onclick="pick(4,this)"><span class="ri">👤</span>Consumer</div>
+    <div class="rt" data-r="0" onclick="pick(0,this)"><span class="ri">🔍</span>Verify</div>
+  </div>
+
+  <div class="wbar">
+    <div class="wled" id="led"></div>
+    <div><div class="wlabel">Wallet</div><div class="waddr" id="waddr">Not connected</div></div>
+  </div>
+
+  <button class="bmm bmm-main" id="cbtn" onclick="doConnect()">
+    <svg width="20" height="20" viewBox="0 0 35 33" fill="none">
+      <path d="M32.9 1L19.4 10.7l2.4-5.8L32.9 1z" fill="#E17726"/>
+      <path d="M2.1 1l13.4 9.8-2.3-5.9L2.1 1z" fill="#E27625"/>
+      <path d="M28.1 23.5l-3.6 5.5 7.7 2.1 2.2-7.4-6.3-.2z" fill="#E27625"/>
+      <path d="M1.6 23.7l2.2 7.4 7.7-2.1-3.6-5.5-6.3.2z" fill="#E27625"/>
+    </svg>
+    Connect with MetaMask
+  </button>
+
+
+  <div class="note" id="rnote">🛡️ Regulator — full system access: register actors, view all batches, issue recalls.</div>
+
+  <div class="foot"><div class="foot-dot"></div>Ethereum · Sepolia Testnet</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.10.0/web3.min.js"></script>
+<script>
+// ── PARTICLES ──────────────────────────────────────────────
+(function(){
+  var c=document.getElementById('dots');
+  for(var i=0;i<20;i++){
+    var d=document.createElement('div');
+    d.className='dot';
+    d.style.cssText='left:'+Math.random()*100+'%;animation-duration:'+(9+Math.random()*10)+'s;animation-delay:-'+(Math.random()*18)+'s;opacity:'+(0.2+Math.random()*0.5);
+    c.appendChild(d);
+  }
+})();
+
+// ── STATE ──────────────────────────────────────────────────
+var role=5;
+var NOTES={
+  5:'🛡️ Regulator — full system access: register actors, view all batches, issue recalls.',
+  1:'🏭 Manufacturer — register drug batches, transfer to distributors, issue recalls.',
+  2:'🚚 Distributor — receive shipments, forward to pharmacies.',
+  3:'💊 Pharmacist — verify drugs, dispense to consumers, monitor expiry.',
+  4:'👤 Consumer — verify your medicine, view dispensing history, see recall alerts.',
+  0:'🔍 Verify-only — check any batch ID for authenticity, no account needed.'
+};
+var PAGES={5:'regulator',1:'manufacturer',2:'distributor',3:'pharmacist',4:'consumer',0:'consumer'};
+
+function pick(r,el){
+  role=r;
+  document.querySelectorAll('.rt').forEach(function(t){t.classList.remove('on')});
+  el.classList.add('on');
+  document.getElementById('rnote').textContent=NOTES[r];
+}
+
+// ── ALERT ──────────────────────────────────────────────────
+function alert2(msg,type){
+  var el=document.getElementById('alert');
+  el.className='a-'+(type||'info');
+  el.innerHTML=msg;
+  el.style.display='flex';
+}
+function clearAlert(){document.getElementById('alert').style.display='none'}
+
+// ── SAVE + REDIRECT ────────────────────────────────────────
+function go(addr,r,name){
+  sessionStorage.setItem('pc',JSON.stringify({addr:addr,role:r,name:name||'User',demo:false}));
+  window.location.href=PAGES[r]+'.html';
+}
+
+// ── CONTRACT ADDRESS ───────────────────────────────────────
+// ★ PASTE YOUR DEPLOYED ADDRESS HERE AFTER REMIX DEPLOYMENT ★
+var CONTRACT='0x20CA98D26f0F8CA730a75B5a32c9d3Eb1E12e65b';
+var ABI=[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "a",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "uint8",
+        "name": "role",
+        "type": "uint8"
+      },
+      {
+        "internalType": "string",
+        "name": "lic",
+        "type": "string"
+      }
+    ],
+    "name": "addActor",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "AlreadyRecalled",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "BadInput",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "consumer",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "note",
+        "type": "string"
+      }
+    ],
+    "name": "dispense",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "Exists",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "Inactive",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "IsExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "IsRecalled",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotHolder",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotYourRole",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "OnlyOwnerOrRegulator",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "WrongRole",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "who",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "role",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      }
+    ],
+    "name": "ActorAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "by",
+        "type": "address"
+      }
+    ],
+    "name": "BatchCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "pharmacist",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "consumer",
+        "type": "address"
+      }
+    ],
+    "name": "BatchDispensed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "status",
+        "type": "uint8"
+      }
+    ],
+    "name": "BatchMoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "reason",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "by",
+        "type": "address"
+      }
+    ],
+    "name": "BatchRecalled",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "expires",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "comp",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "price",
+        "type": "uint256"
+      }
+    ],
+    "name": "manufacture",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "reason",
+        "type": "string"
+      }
+    ],
+    "name": "recall",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "a",
+        "type": "address"
+      }
+    ],
+    "name": "removeActor",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "dist",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "note",
+        "type": "string"
+      }
+    ],
+    "name": "sendToDistributor",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "pharm",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "note",
+        "type": "string"
+      }
+    ],
+    "name": "sendToPharmacy",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "actorCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "actors",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "uint8",
+        "name": "role",
+        "type": "uint8"
+      },
+      {
+        "internalType": "bool",
+        "name": "isActive",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "registeredAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "license",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "allBatches",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "byRole",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "drugCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "name": "drugs",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "batchId",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "mfrName",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "madeAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "expiresAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "composition",
+        "type": "string"
+      },
+      {
+        "internalType": "uint8",
+        "name": "status",
+        "type": "uint8"
+      },
+      {
+        "internalType": "address",
+        "name": "holder",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "recalled",
+        "type": "bool"
+      },
+      {
+        "internalType": "string",
+        "name": "recallReason",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "price",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "a",
+        "type": "address"
+      }
+    ],
+    "name": "getActor",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "uint8",
+        "name": "role",
+        "type": "uint8"
+      },
+      {
+        "internalType": "bool",
+        "name": "active",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "since",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "lic",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getAllBatches",
+    "outputs": [
+      {
+        "internalType": "string[]",
+        "name": "",
+        "type": "string[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint8",
+        "name": "r",
+        "type": "uint8"
+      }
+    ],
+    "name": "getByRole",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      }
+    ],
+    "name": "getDrug",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "mfr",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "madeAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "expiresAt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "comp",
+        "type": "string"
+      },
+      {
+        "internalType": "uint8",
+        "name": "status",
+        "type": "uint8"
+      },
+      {
+        "internalType": "address",
+        "name": "holder",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "recalled",
+        "type": "bool"
+      },
+      {
+        "internalType": "string",
+        "name": "recallReason",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "price",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "a",
+        "type": "address"
+      }
+    ],
+    "name": "getInventory",
+    "outputs": [
+      {
+        "internalType": "string[]",
+        "name": "",
+        "type": "string[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      }
+    ],
+    "name": "getLogs",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "from",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "ts",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "note",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct PharmaChain.Log[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "inventory",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "logs",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint8",
+        "name": "status",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "ts",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "note",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "stats",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "total",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "people",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "recalled",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "id",
+        "type": "string"
+      }
+    ],
+    "name": "verify",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "authentic",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "expired",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "recalled",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+
+// ── METAMASK CONNECT ───────────────────────────────────────
+async function doConnect(){
+  var btn=document.getElementById('cbtn');
+
+  // 1. MetaMask installed?
+  if(typeof window.ethereum==='undefined'){
+    alert2('❌ MetaMask not found. Install the MetaMask extension from metamask.io then refresh.','err');
+    return;
+  }
+
+  // 2. Contract deployed?
+  if(CONTRACT==='0x0000000000000000000000000000000000000000'){
+    alert2('⚠️ You have not set the contract address yet.<br><br>Open <b>login.html</b> in a text editor → find the line <code>var CONTRACT=\'0x000...\'</code> → replace with your Remix-deployed address.','warn');
+    return;
+  }
+
+  btn.disabled=true;
+  btn.textContent='⏳  Requesting access…';
+  alert2('Connecting to MetaMask…','info');
+
+  try{
+    // Request accounts
+    var accounts=await window.ethereum.request({method:'eth_requestAccounts'});
+    var account=accounts[0];
+
+    // Update UI
+    document.getElementById('led').classList.add('on');
+    document.getElementById('waddr').textContent=account.slice(0,6)+'…'+account.slice(-4);
+
+    // Read actor from chain
+    var web3=new Web3(window.ethereum);
+    var contract=new web3.eth.Contract(ABI,CONTRACT);
+    var actor=await contract.methods.getActor(account).call();
+    var r=parseInt(actor.role);
+    var active=actor.active;
+    var name=actor.name;
+
+    if(r===0||!active){
+      alert2('⚠️ Your wallet is connected but not registered on the contract.<br><br>Ask the <b>Regulator</b> to register your address first, then try again.','warn');
+      btn.disabled=false;btn.textContent='Connect with MetaMask';
+      return;
+    }
+
+    alert2('✅ Welcome, <b>'+name+'</b>! Redirecting…','ok');
+    setTimeout(function(){go(account,r,name)},1100);
+
+  }catch(e){
+    var m=e.message||'Unknown error';
+    if(m.toLowerCase().includes('user rejected')||m.includes('4001'))
+      m='You rejected the MetaMask popup. Click Connect and approve it.';
+    else if(m.includes('Already processing'))
+      m='MetaMask is already open — check your browser toolbar.';
+    alert2('❌ '+m,'err');
+    btn.disabled=false;
+    btn.textContent='Connect with MetaMask';
+  }
+}
+
+// ── DEMO MODE ──────────────────────────────────────────────
+function doDemo(){
+  var NAMES={5:'Dr. Regulator',1:'PharmaGen Ltd',2:'QuickDist Corp',3:'City Pharmacy',4:'John Doe',0:'Guest Verifier'};
+  var addr={5:'0xDemo…Reg',1:'0xDemo…Mfr',2:'0xDemo…Dst',3:'0xDemo…Phm',4:'0xDemo…Csm',0:'0xDemo…Gst'};
+  document.getElementById('led').classList.add('on');
+  document.getElementById('waddr').textContent=addr[role];
+  sessionStorage.setItem('pc',JSON.stringify({addr:addr[role],role:role,name:NAMES[role],demo:true}));
+  alert2('✅ Demo login as <b>'+NAMES[role]+'</b>. Redirecting…','ok');
+  setTimeout(function(){window.location.href=PAGES[role]+'.html'},900);
+}
+</script>
+
+</body>
+</html>
