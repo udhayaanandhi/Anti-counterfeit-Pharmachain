@@ -25,7 +25,7 @@ The system consists of the following layers:
 
 * **User Layer** – Interaction via web interface
 * **Wallet Layer** – MetaMask for transaction signing
-* **Network Layer** – Ethereum Blockchain (Ganache for local testing)
+* **Network Layer** – Ethereum Blockchain
 * **Smart Contract Layer** – Handles drug lifecycle
 * **Storage Layer** – Blockchain ledger
 
@@ -35,7 +35,6 @@ The system consists of the following layers:
 
 * **Blockchain**: Ethereum
 * **Smart Contracts**: Solidity
-* **Development Framework**: Truffle
 * **Local Blockchain**: Ganache
 * **Frontend**: HTML, CSS, JavaScript
 * **Wallet**: MetaMask
@@ -96,13 +95,6 @@ npm run dev
 3. Transfer drug through supply chain
 4. Verify drug authenticity before purchase
 
----
-
-## 📸 Screenshots
-
-*Add screenshots of your UI, transactions, and verification results here*
-
----
 
 ## 🎯 Objectives
 
@@ -118,16 +110,6 @@ npm run dev
 * Integration with real-time pharmacy systems
 * Mobile application support
 * AI-based fraud detection
-
----
-
-## 📚 References
-
-* Research papers on blockchain in pharmaceutical supply chain
-* Ethereum & Solidity documentation
-* Truffle Suite documentation
-
----
 
 ## 📜 License
 
