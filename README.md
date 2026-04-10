@@ -1,4 +1,4 @@
-#💊 Anti-Counterfeit Pharmachain
+#💊 **Anti-Counterfeit Pharmachain**
 
 A blockchain-based system to prevent counterfeit drugs in the pharmaceutical supply chain using Ethereum smart contracts and decentralized verification.
 
